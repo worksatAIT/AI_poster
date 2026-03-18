@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sudoku Game - Challenge Your Mind</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="container">
+        <!-- Header -->
+        <header class="header">
+            <div class="header-content">
+                <h1 class="title">🎮 SUDOKU</h1>
+                <p class="subtitle">Challenge Your Mind</p>
+            </div>
+        </header>
+
+        <!-- Main Game Area -->
+        <main class="game-container">
+            <!-- Control Panel -->
+            <div class="control-panel">
+                <div class="level-selector">
+                    <label>Select Level:</label>
+                    <div class="button-group">
+                        <button class="level-btn active" data-level="6">6×6</button>
+                        <button class="level-btn" data-level="9">9×9</button>
+                    </div>
+                </div>
+
+                <div class="game-stats">
+                    <div class="stat">
+                        <span class="stat-label">Time:</span>
+                        <span class="stat-value" id="timer">00:00</span>
+                    </div>
+                    <div class="stat">
+                        <span class="stat-label">Errors:</span>
+                        <span class="stat-value" id="errors">0</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Sudoku Grid -->
+            <div class="game-content">
+                <div class="sudoku-wrapper">
+                    <div class="sudoku-board" id="sudokuBoard"></div>
+                </div>
+
+                <!-- Number Pad -->
+                <div class="number-pad">
+                    <label>Number Input:</label>
+                    <div class="number-pad-buttons">
+                        <button class="num-btn" data-num="1">1</button>
+                        <button class="num-btn" data-num="2">2</button>
+                        <button class="num-btn" data-num="3">3</button>
+                        <button class="num-btn" data-num="4">4</button>
+                        <button class="num-btn" data-num="5">5</button>
+                        <button class="num-btn" data-num="6">6</button>
+                        <button class="num-btn" id="clear-btn" data-num="0">Clear</button>
+                        <button class="num-btn" data-num="7" id="btn7">7</button>
+                        <button class="num-btn" data-num="8" id="btn8">8</button>
+                        <button class="num-btn" data-num="9" id="btn9">9</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Action Buttons -->
+            <div class="action-buttons">
+                <button class="btn btn-primary" id="newGameBtn">🔄 New Game</button>
+                <button class="btn btn-secondary" id="resetBtn">↺ Reset</button>
+                <button class="btn btn-secondary" id="hintBtn">💡 Hint</button>
+                <button class="btn btn-success" id="checkBtn">✓ Check</button>
+                <button class="btn btn-warning" id="solveBtn">🎯 Solve</button>
+            </div>
+
+            <!-- Status Messages -->
+            <div class="message-area">
+                <div class="message" id="message"></div>
+            </div>
+        </main>
+
+        <!-- Footer -->
+        <footer class="footer">
+            <p>© 2026 Sudoku Game | Made with ❤️</p>
+        </footer>
+    </div>
+
+    <!-- Modal for Difficulty Selection -->
+    <div class="modal active" id="difficultyModal">
+        <div class="modal-content difficulty-content">
+            <h2>🎮 Select Difficulty</h2>
+            <p>Choose your challenge level:</p>
+            <div class="difficulty-buttons">
+                <button class="difficulty-btn" data-difficulty="6">
+                    <span class="difficulty-number">6×6</span>
+                    <span class="difficulty-desc">Easy (6×6 with 3×2 boxes)</span>
+                </button>
+                <button class="difficulty-btn" data-difficulty="9">
+                    <span class="difficulty-number">9×9</span>
+                    <span class="difficulty-desc">Hard (9×9 with 3×3 boxes)</span>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal for Game Completion -->
+    <div class="modal" id="completionModal">
+        <div class="modal-content">
+            <h2>🎉 Congratulations!</h2>
+            <p>You've completed the Sudoku puzzle!</p>
+            <p id="completionStats"></p>
+            <button class="btn btn-primary" onclick="location.reload()">Play Again</button>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
