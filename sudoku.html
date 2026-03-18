@@ -612,7 +612,6 @@
                     <button class="btn btn-secondary" id="resetBtn">↺ Reset</button>
                     <button class="btn btn-secondary" id="hintBtn">💡 Hint</button>
                     <button class="btn btn-success" id="checkBtn">✓ Check</button>
-                    <button class="btn btn-warning" id="solveBtn">🎯 Solve</button>
                 </div>
 
                 <!-- Message -->
@@ -671,7 +670,6 @@
                 document.getElementById('resetBtn').addEventListener('click', () => this.resetBoard());
                 document.getElementById('hintBtn').addEventListener('click', () => this.giveHint());
                 document.getElementById('checkBtn').addEventListener('click', () => this.checkBoard());
-                document.getElementById('solveBtn').addEventListener('click', () => this.solveBoard());
 
                 // Timer control buttons
                 document.getElementById('startTimerBtn').addEventListener('click', () => this.onStartTimer());
