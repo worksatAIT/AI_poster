@@ -293,6 +293,18 @@
             box-shadow: none;
         }
 
+        .sudoku-cell.error-diagonal {
+            background-image: linear-gradient(
+                45deg,
+                transparent 46%,
+                #e53935 46%,
+                #e53935 54%,
+                transparent 54%
+            );
+            background-repeat: no-repeat;
+            background-size: 100% 100%;
+        }
+
         .sudoku-cell.correct {
             background: white;
             color: #333;
@@ -481,6 +493,13 @@
 
         .message.show {
             display: block;
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            z-index: 2000;
+            width: min(90vw, 680px);
+            box-shadow: 0 16px 40px rgba(0, 0, 0, 0.25);
         }
 
         .message.success {
@@ -622,6 +641,7 @@
                 this.boxWidth = 3;
                 this.board = [];
                 this.originalBoard = [];
+                this.solutionBoard = [];
                 this.selectedCell = null;
                 this.timerInterval = null;
                 this.elapsedSeconds = 0;
@@ -752,6 +772,7 @@
                 const board = Array(this.gridSize).fill(null).map(() => Array(this.gridSize).fill(0));
 
                 this.solveSudoku(board);
+                this.solutionBoard = this.copyBoard(board);
 
                 const removals = this.gridSize === 6 ? 10 : 40;
                 for (let i = 0; i < removals; i++) {
@@ -906,7 +927,7 @@
                 const value = e.target.value;
                 if (value === '') {
                     this.board[row][col] = 0;
-                    e.target.classList.remove('error', 'correct');
+                    e.target.classList.remove('error', 'correct', 'error-diagonal');
                 } else if (/^[1-9]$/.test(value)) {
                     const num = parseInt(value, 10);
                     if (num > this.gridSize) {
@@ -921,7 +942,7 @@
                 } else {
                     e.target.value = '';
                     this.board[row][col] = 0;
-                    e.target.classList.remove('error', 'correct');
+                    e.target.classList.remove('error', 'correct', 'error-diagonal');
                 }
             }
 
@@ -942,7 +963,7 @@
                 if (num === 0) {
                     this.board[row][col] = 0;
                     this.selectedCell.value = '';
-                    this.selectedCell.classList.remove('error', 'correct');
+                    this.selectedCell.classList.remove('error', 'correct', 'error-diagonal');
                 } else {
                     if (num > this.gridSize) {
                         this.showMessage(`Use numbers 1-${this.gridSize} for this level.`, 'error');
@@ -954,11 +975,11 @@
                     if (!this.isValid(this.board, row, col, num)) {
                         this.selectedCell.value = num;
                         this.selectedCell.classList.add('error');
-                        this.selectedCell.classList.remove('correct');
-                        this.showMessage('Number conflicts with row, column, or box.', 'error');
+                        this.selectedCell.classList.remove('correct', 'error-diagonal');
+                        this.clearMessage();
                     } else {
                         this.selectedCell.value = num;
-                        this.selectedCell.classList.remove('error');
+                        this.selectedCell.classList.remove('error', 'error-diagonal');
                         this.selectedCell.classList.add('correct');
                         this.clearMessage();
                     }
@@ -967,31 +988,44 @@
 
             checkBoard() {
                 let hasEmpty = false;
-                let hasConflict = false;
+                let hasIncorrect = false;
+
+                if (!this.solutionBoard || this.solutionBoard.length === 0) {
+                    this.showMessage('Start a new game first!', 'info');
+                    return;
+                }
 
                 for (let row = 0; row < this.gridSize; row++) {
                     for (let col = 0; col < this.gridSize; col++) {
+                        const cell = document.querySelector(`[data-row="${row}"][data-col="${col}"]`);
+                        cell.classList.remove('error-diagonal');
+
                         const value = this.board[row][col];
                         if (value === 0) {
                             hasEmpty = true;
                             continue;
                         }
 
-                        if (!this.isSafe(this.board, row, col, value)) {
-                            hasConflict = true;
+                        if (value !== this.solutionBoard[row][col]) {
+                            cell.classList.add('error-diagonal');
+                            hasIncorrect = true;
                         }
                     }
                 }
 
-                if (hasConflict) {
-                    this.showMessage('There are conflicts in the board.', 'error');
+                if (hasIncorrect) {
+                    this.showMessage('Some values are incorrect.', 'error');
                     return;
                 }
 
                 if (hasEmpty) {
                     this.showMessage('Please fill all cells first!', 'info');
                 } else {
-                    this.showMessage('✓ Puzzle solved! Congratulations!', 'success');
+                    this.timerRunning = false;
+                    this.clearTimer();
+                    this.showStartTimerBtn();
+                    const timeTaken = this.formatElapsedTime(this.elapsedSeconds);
+                    this.showMessage(`✓ Puzzle solved! Time taken: ${timeTaken}`, 'success');
                 }
             }
 
@@ -1011,15 +1045,13 @@
                 }
 
                 const randomCell = emptyCells[Math.floor(Math.random() * emptyCells.length)];
-                const solutionBoard = this.copyBoard(this.originalBoard);
-                this.solveSudoku(solutionBoard);
 
                 const row = randomCell.row;
                 const col = randomCell.col;
-                this.board[row][col] = solutionBoard[row][col];
+                this.board[row][col] = this.solutionBoard[row][col];
 
                 const cell = document.querySelector(`[data-row="${row}"][data-col="${col}"]`);
-                cell.value = solutionBoard[row][col];
+                cell.value = this.solutionBoard[row][col];
                 cell.classList.add('given');
 
                 this.showMessage('Hint provided!', 'success');
@@ -1058,7 +1090,7 @@
                             this.board[row][col] = 0;
                             const cell = document.querySelector(`[data-row="${row}"][data-col="${col}"]`);
                             cell.value = '';
-                            cell.classList.remove('error', 'correct');
+                            cell.classList.remove('error', 'correct', 'error-diagonal');
                         }
                     }
                 }
@@ -1077,11 +1109,14 @@
             startTimer() {
                 this.timerInterval = setInterval(() => {
                     this.elapsedSeconds++;
-                    const mins = Math.floor(this.elapsedSeconds / 60);
-                    const secs = this.elapsedSeconds % 60;
-                    document.getElementById('timer').textContent = 
-                        `${String(mins).padStart(2, '0')}:${String(secs).padStart(2, '0')}`;
+                    document.getElementById('timer').textContent = this.formatElapsedTime(this.elapsedSeconds);
                 }, 1000);
+            }
+
+            formatElapsedTime(totalSeconds) {
+                const mins = Math.floor(totalSeconds / 60);
+                const secs = totalSeconds % 60;
+                return `${String(mins).padStart(2, '0')}:${String(secs).padStart(2, '0')}`;
             }
 
             pauseTimer() {
